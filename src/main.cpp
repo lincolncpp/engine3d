@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cmath>
-#include "model.hpp"
+#include "object.hpp"
 #include "utils.hpp"
 
 using namespace std;
@@ -33,6 +33,8 @@ const GLchar* fragment_code =
     "    gl_FragColor = color;\n"
     "}\n";
  
+ // Scene objects
+ vector<Object*> objects;
 
 
 
@@ -57,6 +59,11 @@ void compileShader(GLuint shader){
     }
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
+    if (key == GLFW_KEY_E && action == GLFW_PRESS){
+        cout << "E pressed" << endl;
+    }
+}
  
 int main(){
  
@@ -67,7 +74,7 @@ int main(){
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     // Creating GLFW window
-    GLFWwindow* window = glfwCreateWindow(800, 800, "SCC0250 - Trabalho 1", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 800, "3DEngine", NULL, NULL);
 
     // Making the context of the window for the calling thread
     glfwMakeContextCurrent(window);
@@ -97,55 +104,57 @@ int main(){
     glLinkProgram(program);
     glUseProgram(program);
  
+    // Loading objects 3d
+    objects.push_back(new Object("models/teapot.data"));
 
+    // Loading vertices from all objects
+    vector<Point> vertex_all;
+    for(int i = 0;i < objects.size();i++){
+        // Setting object buffer offset
+        objects[i]->setVertexOffset(vertex_all.size());
 
-
-    Model* pain = new Model("models/teapot.data");
-    vector<Point> v = pain->getVertices();
-
-    int num_vertices = v.size();
-    Point vertices[num_vertices]; 
-
-    for(int i = 0;i < num_vertices;i++){
-        vertices[i] = v[i];
-        vertices[i].x /= 4.f;
-        vertices[i].y /= 4.f;
-        vertices[i].z /= 4.f;
+        // Inserting object vertices into vertex_all
+        vector<Point> vertex = objects[i]->getVertices();
+        vertex_all.insert(vertex_all.end(), vertex.begin(), vertex.end());
     }
 
+    // Converting vector to array
+    int object_vertices = vertex_all.size();
+    Point vertices[object_vertices];
+    for(int i = 0;i < object_vertices;i++){
+        vertices[i] = vertex_all[i];
+    }
 
+    // Creating vertices buffer
     GLuint buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-
-    // Abaixo, nós enviamos todo o conteúdo da variável vertices.
+    // Sending all vertices to buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-
-    // Associando variáveis do programa GLSL (Vertex Shaders) com nossos dados
+    // Getting GLSL position id
     GLint loc = glGetAttribLocation(program, "position");
     glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
+    glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*) 0);
  
-
-    // Associando variávels do programa GLSL (Fragment Shader) para definir cores
+    // Getting GLSL color id
     GLint loc_color = glGetUniformLocation(program, "color");
 
+    // Getting GLSL mat_transformation id
     GLint loc_transform = glGetUniformLocation(program, "mat_transformation");
 
-
-    // Exibindo nossa janela
+    // Showing GLFW window
     glfwShowWindow(window);
 
+    // Enabling GL_DEPTH_TEST
+    glEnable(GL_DEPTH_TEST);
+    
+    // Setting input callback
+    glfwSetKeyCallback(window, key_callback);
 
-    glEnable(GL_DEPTH_TEST);// ### importante para 3D
 
-    while (!glfwWindowShouldClose(window))
-    {
-
-
-
+    while (!glfwWindowShouldClose(window)){
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -191,15 +200,15 @@ int main(){
 
 
         // multiplica(mat_rotation_z,mat_rotation_x, mat_transformation);
-        multiplica(mat_rotation_y,mat_transformation, mat_transformation);
+        matrix_mul(mat_rotation_y,mat_transformation, mat_transformation);
 
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+        // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
         // enviando a matriz de transformacao para a GPU
         glUniformMatrix4fv(loc_transform, 1, GL_TRUE, mat_transformation);
 
         
-        for(int triangle=0; triangle < num_vertices; triangle=triangle+3){
+        for(int triangle=0; triangle < object_vertices; triangle=triangle+3){
             
             srand(triangle); // definir mesma semente aleatoria para cada triangulo
             float R = (float)rand() / (float)RAND_MAX ;

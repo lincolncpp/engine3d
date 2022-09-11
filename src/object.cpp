@@ -1,12 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "model.hpp"
+#include "object.hpp"
 
 using namespace std;
 
 
-string Model::loadFile(string path){
+string Object::loadFile(string path){
     // Loading file
     ifstream file(path);
     if (file.is_open()){
@@ -30,7 +30,7 @@ string Model::loadFile(string path){
     return "";
 }
 
-void Model::loadModel(string path){
+void Object::loadModel(string path){
     // Loading model data from file
     string data = loadFile(path);
 
@@ -49,11 +49,33 @@ void Model::loadModel(string path){
     }
 }
 
-Model::Model(string data){
+Object::Object(string data){
     loadModel(data);
-    
 }
 
-vector<Point> Model::getVertices(){
+vector<Point> Object::getVertices(){
     return vertex;
+}
+
+float* Object::getTransform(){
+    return transform;
+}
+
+void Object::scale(float value){
+    // Need impĺementation
+}
+
+void Object::rotate(float radian){
+    // Need impĺementation
+}
+void Object::translate(float x, float y, float z){
+    // Need impĺementation
+}
+
+void Object::setVertexOffset(int value){
+    vertex_offset = value;
+}
+
+int Object::getVertexOffset(){
+    return vertex_offset;
 }

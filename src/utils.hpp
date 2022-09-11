@@ -7,6 +7,6 @@ struct Point{
     Point(float x, float y, float z) : x(x), y(y), z(z){}
 };
 
-void multiplica(float *m1, float *m2, float *m_resultado);
+void matrix_mul(float *a, float *b, float *c);
 
 #endif
