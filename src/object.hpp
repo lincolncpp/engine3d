@@ -10,6 +10,7 @@ using namespace std;
 #define VERTEX_OPPOSITE 1<<0
 #define VERTEX_HALF 1<<1
 #define VERTEX_CENTRALIZE 1<<2
+#define VERTEX_NORMALIZE 1<<3
 
 
 class Object{
@@ -23,7 +24,6 @@ private:
     };
     vector<Vertex> vertex;
 
-    string loadFile(string path);
     void loadModel(string path);
 
 public:

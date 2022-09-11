@@ -156,11 +156,20 @@ int main(){
     glUseProgram(program);
  
     // Loading objects 3d
+    objects.push_back(new Object("models/car.obj"));
+    objects.push_back(new Object("models/tree.obj"));
+    objects.push_back(new Object("models/rat.obj"));
     objects.push_back(new Object("models/monkey.obj"));
     
 
     // Modifying model vertices
-    objects[0]->VertexModifier(VERTEX_HALF);
+    objects[0]->VertexModifier(VERTEX_NORMALIZE | VERTEX_CENTRALIZE);
+
+    objects[1]->VertexModifier(VERTEX_NORMALIZE);
+
+    objects[2]->VertexModifier(VERTEX_NORMALIZE);
+
+    objects[3]->VertexModifier(VERTEX_HALF);
 
 
     // Loading vertices from all objects

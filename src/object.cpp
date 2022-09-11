@@ -8,79 +8,79 @@
 using namespace std;
 
 
-string Object::loadFile(string path){
+// .obj loader
+void Object::loadModel(string path){
     // Loading file
     ifstream file(path);
     if (file.is_open()){
 
+        // .obj structure
+        vector<Vertex> vertices;
+        vector<Face> faces;
+
         // Getting data from file
-        string in = "";
         string buffer;
         while(getline(file, buffer)){
-            in += buffer + " ";
+            vector<string>params;
+            params.push_back("");
+
+            
+
+            // Parsing parameters
+            for(int i = 0;i < buffer.length();i++){
+                if (buffer[i] == ' '){
+                    if (params.back().length() > 0) params.push_back("");
+                }
+                else{
+                    params.back() += buffer[i];
+                }
+            }
+            if (params.back().length() == 0) params.pop_back();
+
+            // Reading vertex
+            if (params[0].compare("v") == 0){
+                Vertex v;
+                v.x = stof(params[1]);
+                v.y = stof(params[2]);
+                v.z = stof(params[3]);
+                vertices.push_back(v);
+            }
+
+            // Reading face
+            if (params[0].compare("f") == 0){
+                vector<int>f;
+
+                // Getting vertices from face
+                for(int i = 1;i < params.size();i++){
+                    string vparsed = params[i].substr(0, params[i].find("/"));
+                    int v = stoi(vparsed)-1; // Converting to base-0
+                    f.push_back(v);
+                }
+
+                // Creating triangles
+                for(int i = 0;i+3 <= f.size();i++){
+                    Face face(f[0], f[i+1], f[i+2]);
+                    faces.push_back(face);
+                }
+            }
+        }
+
+        // Creating ordered vertices
+        for(Face &f:faces){
+            vertex.push_back(vertices[f.a]);
+            vertex.push_back(vertices[f.b]);
+            vertex.push_back(vertices[f.c]);
         }
 
         // Closing file
         file.close();
-
-        return in;
     }
     else{
         cout << "Can't open file " << path << endl;
     }
-
-    return "";
 }
 
-void Object::loadModel(string path){
-    // Loading model data from file
-    string data = loadFile(path);
-
-    // Send model data to cpp input buffer
-    istringstream input(data);
-    cin.rdbuf(input.rdbuf());
     
-
-    // .obj structure
-    vector<Vertex> vertices;
-    vector<Face> faces;
-
-
-    // Reading .obj file
-    string cmd;
-    while(cin>>cmd){
-        // Reading vertex
-        if (cmd.compare("v") == 0){
-            Vertex p;
-            cin>>p.x>>p.y>>p.z;
-
-            vertices.push_back(p);
-        }
-
-        // Reading face
-        if (cmd.compare("f") == 0){
-            Face f;
-            string s;
-            cin>>f.a>>s;
-            cin>>f.b>>s;
-            cin>>f.c>>s;
-
-            // Converting to base-0
-            f.a--;
-            f.b--;
-            f.c--;
-
-            faces.push_back(f);
-        }
-    }
-
-    // Creating ordered vertices
-    for(Face &f:faces){
-        vertex.push_back(vertices[f.a]);
-        vertex.push_back(vertices[f.b]);
-        vertex.push_back(vertices[f.c]);
-    }
-}
 
 Object::Object(string data){
     loadModel(data);    
@@ -191,6 +191,21 @@ void Object::Draw(GLint loc_transform, GLint loc_color){
 }
 
 void Object::VertexModifier(int modifier){
+    // Normalizing vertex size
+    if (modifier&VERTEX_NORMALIZE){
+        float mx = -1e9;
+        for(Vertex &p:vertex){
+            mx = max(mx, abs(p.x));
+            mx = max(mx, abs(p.y));
+            mx = max(mx, abs(p.z));
+        }
+        for(Vertex &p:vertex){
+            p.x *= 1.0f / mx;
+            p.y *= 1.0f / mx;
+            p.z *= 1.0f / mx;
+        }
+    }
+
     // Setting vertex (x, y, z) to (-x, -y, -z)
     if (modifier&VERTEX_OPPOSITE){
         for(Vertex &p:vertex){
