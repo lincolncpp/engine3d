@@ -7,14 +7,6 @@
 #include "utils.hpp"
 
 using namespace std;
- 
-
-
-float angulo = 0.0f;
-float angulo_inc = 0.5f;
-
-float c = 1.0f; // armazenar cosseno (da matriz de rotacao)
-float s = 0.0f; // armazenar seno  (da matriz de rotcao)
 
 // Vertex Shader GLSL code 
 const GLchar* vertex_code =
@@ -35,6 +27,7 @@ const GLchar* fragment_code =
  
  // Scene objects
  vector<Object*> objects;
+ int selected_object = 0;
 
 
 
@@ -60,9 +53,45 @@ void compileShader(GLuint shader){
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
-    if (key == GLFW_KEY_E && action == GLFW_PRESS){
-        cout << "E pressed" << endl;
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
+        selected_object++;
+        selected_object %= objects.size();
+
+        cout << "Selected object: " << selected_object << endl;
     }
+
+    // Rotate -y (key RIGHT)
+    if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->rotate(0, -M_PI / 10.0f, 0);
+        cout << "Rotate(0, -π/10, 0)"  << endl;
+    }
+    // Rotate y (key LEFT)
+    if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->rotate(0, M_PI / 10.0f, 0);
+        cout << "Rotate(0, π/10, 0)"  << endl;
+    }
+    // Rotate -z (key UP)
+    if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->rotate(0, 0, -M_PI / 10.0f);
+        cout << "Rotate(-π/10, 0, 0)"  << endl;
+    }
+    // Rotate z (key DOWN)
+    if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->rotate(0, 0, M_PI / 10.0f);
+        cout << "Rotate(π/10, 0, 0)"  << endl;
+    }
+
+    // Scale up (key E)
+    if (key == GLFW_KEY_E && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->scale(1.1f);
+        cout << "Scale(1.1)"  << endl;
+    }
+    // Scale down (key Q)
+    if (key == GLFW_KEY_Q && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->scale(0.9f);
+        cout << "Scale(0.9)"  << endl;
+    }
+
 }
  
 int main(){
@@ -105,6 +134,10 @@ int main(){
     glUseProgram(program);
  
     // Loading objects 3d
+    objects.push_back(new Object("models/teapot.data"));
+    objects.push_back(new Object("models/teapot.data"));
+    objects.push_back(new Object("models/teapot.data"));
+    objects.push_back(new Object("models/teapot.data"));
     objects.push_back(new Object("models/teapot.data"));
 
     // Loading vertices from all objects
@@ -153,75 +186,19 @@ int main(){
     // Setting input callback
     glfwSetKeyCallback(window, key_callback);
 
-
+    int i = 0;
     while (!glfwWindowShouldClose(window)){
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0, 1.0, 1.0, 1.0);
 
-
-
-        angulo += angulo_inc;
-
-
-
-        // definindo a matriz de rotacao (na realidade eh um vetor, mas o OpenGl processa como matriz 4x4)
-        c = cos( ((angulo) * M_PI / 180.0) ); // cos considerando conversao para radianos
-        s = sin( ((angulo) * M_PI / 180.0) );
-
-        float mat_rotation_z[16] = {
-            c   , -s  , 0.0f, 0.0f,
-            s   ,  c  , 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        };
-
-        float mat_rotation_x[16] = {
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f,  c  ,  -s , 0.0f,
-            0.0f,  s  ,   c , 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        };
-
-        float mat_rotation_y[16] = {
-            c   , 0.0f,   s , 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            -s  , 0.0f,   c , 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        };
-
-        float mat_transformation[16] = {
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        };
-
-
-        // multiplica(mat_rotation_z,mat_rotation_x, mat_transformation);
-        matrix_mul(mat_rotation_y,mat_transformation, mat_transformation);
-
         // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
-        // enviando a matriz de transformacao para a GPU
-        glUniformMatrix4fv(loc_transform, 1, GL_TRUE, mat_transformation);
-
-        
-        for(int triangle=0; triangle < object_vertices; triangle=triangle+3){
-            
-            srand(triangle); // definir mesma semente aleatoria para cada triangulo
-            float R = (float)rand() / (float)RAND_MAX ;
-            float G = (float)rand() / (float)RAND_MAX ;
-            float B = (float)rand() / (float)RAND_MAX ;
-
-            glUniform4f(loc_color, R, G, B, 1);
-            glDrawArrays(GL_TRIANGLES, triangle, 3);
-        }
-
+        // Drawing selected object
+        objects[selected_object]->Draw(loc_transform, loc_color);
     
         glfwSwapBuffers(window);
-        
     }
  
     glfwDestroyWindow(window);

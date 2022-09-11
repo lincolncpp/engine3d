@@ -28,11 +28,13 @@ public:
     float* getTransform();
 
     void scale(float value);
-    void rotate(float radian);
+    void rotate(float x, float y, float z);
     void translate(float x, float y, float z);
 
     void setVertexOffset(int value);
     int getVertexOffset();
+
+    void Draw(GLint loc_transform, GLint loc_color);
 };
 
 #endif
