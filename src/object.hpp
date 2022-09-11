@@ -7,6 +7,10 @@
 
 using namespace std;
 
+#define VERTEX_OPPOSITE 1<<0
+#define VERTEX_HALF 1<<1
+#define VERTEX_CENTRALIZE 1<<2
+
 
 class Object{
 private:
@@ -35,6 +39,8 @@ public:
     int getVertexOffset();
 
     void Draw(GLint loc_transform, GLint loc_color);
+
+    void VertexModifier(int modifier);
 };
 
 #endif

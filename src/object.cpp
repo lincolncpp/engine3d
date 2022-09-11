@@ -47,10 +47,6 @@ void Object::loadModel(string path){
         float x, y, z;
         cin>>x>>y>>z;
 
-        x = -x * 0.5f;
-        y = -y * 0.5f;
-        z = -z * 0.5f;
-
         vertex.push_back(Point(x, y, z));
     }
 }
@@ -146,9 +142,10 @@ int Object::getVertexOffset(){
 
 void Object::Draw(GLint loc_transform, GLint loc_color){
     
+    // Sending object matrix to GPU
     glUniformMatrix4fv(loc_transform, 1, GL_TRUE, transform);
 
-        
+    // Drawing triangles
     for(int tri = 0; tri < vertex.size(); tri=tri+3){
         
         srand(vertex_offset + tri);
@@ -162,3 +159,49 @@ void Object::Draw(GLint loc_transform, GLint loc_color){
     }
 }
 
+void Object::VertexModifier(int modifier){
+    // Setting vertex (x, y, z) to (-x, -y, -z)
+    if (modifier&VERTEX_OPPOSITE){
+        for(Point &p:vertex){
+            p.x *= -1;
+            p.y *= -1;
+            p.z *= -1;
+        }
+    }
+
+    // Setting vertex (x, y, z) to (x/2, y/2, z/2)
+    if (modifier&VERTEX_HALF){
+        for(Point &p:vertex){
+            p.x *= 0.5f;
+            p.y *= 0.5f;
+            p.z *= 0.5f;
+        }
+    }
+
+    // Fixing model center
+    if (modifier&VERTEX_CENTRALIZE){
+        float maxx = -1e9;
+        float minx = 1e9;
+        float maxy = -1e9;
+        float miny = 1e9;
+        float maxz = -1e9;
+        float minz = 1e9;
+        for(Point &p:vertex){
+            maxx = max(maxx, p.x);
+            minx = min(minx, p.x);
+            maxy = max(maxy, p.y);
+            miny = min(miny, p.y);
+            maxz = max(maxz, p.z);
+            minz = min(minz, p.z);
+        }
+
+        float cx = (maxx+minx)/2.f;
+        float cy = (maxy+miny)/2.f;
+        float cz = (maxz+minz)/2.f;
+        for(Point &p:vertex){
+            p.x -= cx;
+            p.y -= cy;
+            p.z -= cz;
+        }
+    }
+}

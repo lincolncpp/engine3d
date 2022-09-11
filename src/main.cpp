@@ -156,11 +156,18 @@ int main(){
     glUseProgram(program);
  
     // Loading objects 3d
+    objects.push_back(new Object("models/house.data"));
+    objects.push_back(new Object("models/icosahedron.data"));
+    objects.push_back(new Object("models/monkey.obj"));
     objects.push_back(new Object("models/teapot.data"));
     objects.push_back(new Object("models/teapot.data"));
-    objects.push_back(new Object("models/teapot.data"));
-    objects.push_back(new Object("models/teapot.data"));
-    objects.push_back(new Object("models/teapot.data"));
+
+
+    // Modifying house vertex
+    objects[0]->VertexModifier(VERTEX_HALF | VERTEX_CENTRALIZE);
+    // Modifying teapot vertex
+    objects[3]->VertexModifier(VERTEX_OPPOSITE | VERTEX_HALF | VERTEX_CENTRALIZE);
+
 
     // Loading vertices from all objects
     vector<Point> vertex_all;
