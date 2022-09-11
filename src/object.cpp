@@ -40,14 +40,45 @@ void Object::loadModel(string path){
     istringstream input(data);
     cin.rdbuf(input.rdbuf());
     
-    // Reading all model vertices
-    int vertex_count;
-    cin >> vertex_count;
-    for(int i = 0;i < vertex_count;i++){
-        float x, y, z;
-        cin>>x>>y>>z;
 
-        vertex.push_back(Point(x, y, z));
+    // .obj structure
+    vector<Vertex> vertices;
+    vector<Face> faces;
+
+
+    // Reading .obj file
+    string cmd;
+    while(cin>>cmd){
+        // Reading vertex
+        if (cmd.compare("v") == 0){
+            Vertex p;
+            cin>>p.x>>p.y>>p.z;
+
+            vertices.push_back(p);
+        }
+
+        // Reading face
+        if (cmd.compare("f") == 0){
+            Face f;
+            string s;
+            cin>>f.a>>s;
+            cin>>f.b>>s;
+            cin>>f.c>>s;
+
+            // Converting to base-0
+            f.a--;
+            f.b--;
+            f.c--;
+
+            faces.push_back(f);
+        }
+    }
+
+    // Creating ordered vertices
+    for(Face &f:faces){
+        vertex.push_back(vertices[f.a]);
+        vertex.push_back(vertices[f.b]);
+        vertex.push_back(vertices[f.c]);
     }
 }
 
@@ -55,7 +86,7 @@ Object::Object(string data){
     loadModel(data);    
 }
 
-vector<Point> Object::getVertices(){
+vector<Vertex> Object::getVertices(){
     return vertex;
 }
 
@@ -162,7 +193,7 @@ void Object::Draw(GLint loc_transform, GLint loc_color){
 void Object::VertexModifier(int modifier){
     // Setting vertex (x, y, z) to (-x, -y, -z)
     if (modifier&VERTEX_OPPOSITE){
-        for(Point &p:vertex){
+        for(Vertex &p:vertex){
             p.x *= -1;
             p.y *= -1;
             p.z *= -1;
@@ -171,7 +202,7 @@ void Object::VertexModifier(int modifier){
 
     // Setting vertex (x, y, z) to (x/2, y/2, z/2)
     if (modifier&VERTEX_HALF){
-        for(Point &p:vertex){
+        for(Vertex &p:vertex){
             p.x *= 0.5f;
             p.y *= 0.5f;
             p.z *= 0.5f;
@@ -186,7 +217,7 @@ void Object::VertexModifier(int modifier){
         float miny = 1e9;
         float maxz = -1e9;
         float minz = 1e9;
-        for(Point &p:vertex){
+        for(Vertex &p:vertex){
             maxx = max(maxx, p.x);
             minx = min(minx, p.x);
             maxy = max(maxy, p.y);
@@ -198,7 +229,7 @@ void Object::VertexModifier(int modifier){
         float cx = (maxx+minx)/2.f;
         float cy = (maxy+miny)/2.f;
         float cz = (maxz+minz)/2.f;
-        for(Point &p:vertex){
+        for(Vertex &p:vertex){
             p.x -= cx;
             p.y -= cy;
             p.z -= cz;

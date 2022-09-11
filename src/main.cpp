@@ -116,7 +116,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 }
  
-int main(){
+int main(){    
  
     // Initializing GLFW
     glfwInit();
@@ -156,33 +156,27 @@ int main(){
     glUseProgram(program);
  
     // Loading objects 3d
-    objects.push_back(new Object("models/house.data"));
-    objects.push_back(new Object("models/icosahedron.data"));
     objects.push_back(new Object("models/monkey.obj"));
-    objects.push_back(new Object("models/teapot.data"));
-    objects.push_back(new Object("models/teapot.data"));
+    
 
-
-    // Modifying house vertex
-    objects[0]->VertexModifier(VERTEX_HALF | VERTEX_CENTRALIZE);
-    // Modifying teapot vertex
-    objects[3]->VertexModifier(VERTEX_OPPOSITE | VERTEX_HALF | VERTEX_CENTRALIZE);
+    // Modifying model vertices
+    objects[0]->VertexModifier(VERTEX_HALF);
 
 
     // Loading vertices from all objects
-    vector<Point> vertex_all;
+    vector<Vertex> vertex_all;
     for(int i = 0;i < objects.size();i++){
         // Setting object buffer offset
         objects[i]->setVertexOffset(vertex_all.size());
 
         // Inserting object vertices into vertex_all
-        vector<Point> vertex = objects[i]->getVertices();
+        vector<Vertex> vertex = objects[i]->getVertices();
         vertex_all.insert(vertex_all.end(), vertex.begin(), vertex.end());
     }
 
     // Converting vector to array
     int object_vertices = vertex_all.size();
-    Point vertices[object_vertices];
+    Vertex vertices[object_vertices];
     for(int i = 0;i < object_vertices;i++){
         vertices[i] = vertex_all[i];
     }

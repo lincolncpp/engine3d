@@ -21,14 +21,14 @@ private:
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
-    vector<Point> vertex;
+    vector<Vertex> vertex;
 
     string loadFile(string path);
     void loadModel(string path);
 
 public:
     Object(string path);
-    vector<Point> getVertices();
+    vector<Vertex> getVertices();
     float* getTransform();
 
     void scale(float value);
