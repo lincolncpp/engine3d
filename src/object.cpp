@@ -47,12 +47,16 @@ void Object::loadModel(string path){
         float x, y, z;
         cin>>x>>y>>z;
 
+        x = -x * 0.5f;
+        y = -y * 0.5f;
+        z = -z * 0.5f;
+
         vertex.push_back(Point(x, y, z));
     }
 }
 
 Object::Object(string data){
-    loadModel(data);
+    loadModel(data);    
 }
 
 vector<Point> Object::getVertices(){
@@ -64,7 +68,7 @@ float* Object::getTransform(){
 }
 
 void Object::scale(float value){
-    if (abs(value) > 1e-8){
+    if (abs(value) > 1e-8){ // Checking if it's not zero
         float scale[16] = {
             value, 0.0f, 0.0f, 0.0f,
             0.0f ,value, 0.0f, 0.0f,
@@ -78,7 +82,7 @@ void Object::scale(float value){
 
 void Object::rotate(float x, float y, float z){
     // X-axis rotation
-    if (abs(x) > 1e-8){
+    if (abs(x) > 1e-8){ // Checking if it's not zero
         float c = cos(x);
         float s = sin(x);
         float rotx[16] = {
@@ -92,7 +96,7 @@ void Object::rotate(float x, float y, float z){
     }
 
     // Y-axis rotation
-    if (abs(y) > 1e-8){
+    if (abs(y) > 1e-8){ // Checking if it's not zero
         float c = cos(y);
         float s = sin(y);
         float roty[16] = {
@@ -106,7 +110,7 @@ void Object::rotate(float x, float y, float z){
     }
 
     // Z-axis rotation
-    if (abs(z) > 1e-8){
+    if (abs(z) > 1e-8){ // Checking if it's not zero
         float c = cos(z);
         float s = sin(z);
         float rotz[16] = {
@@ -120,7 +124,16 @@ void Object::rotate(float x, float y, float z){
     }
 }
 void Object::translate(float x, float y, float z){
-    // Need impĺementation
+    if (abs(x)+abs(y)+abs(z) > 1e-8){ // Checking if it's not zero
+        float translate[16] = {
+            1.0f , 0.0f, 0.0f,  x  ,
+            0.0f , 1.0f, 0.0f,  y  ,
+            0.0f , 0.0f, 1.0f,  z  ,
+            0.0f , 0.0f, 0.0f, 1.0f,
+        };
+        
+        matrix_mul(transform, translate, transform);
+    }
 }
 
 void Object::setVertexOffset(int value){
@@ -139,9 +152,10 @@ void Object::Draw(GLint loc_transform, GLint loc_color){
     for(int tri = 0; tri < vertex.size(); tri=tri+3){
         
         srand(vertex_offset + tri);
-        float R = (float)rand() / (float)RAND_MAX ;
-        float G = (float)rand() / (float)RAND_MAX ;
-        float B = (float)rand() / (float)RAND_MAX ;
+        float rnd = (float)rand() / (float)RAND_MAX ;
+        float R = rnd;
+        float G = 0.5f;
+        float B = 0.5f;
 
         glUniform4f(loc_color, R, G, B, 1);
         glDrawArrays(GL_TRIANGLES, vertex_offset + tri, 3);

@@ -53,43 +53,65 @@ void compileShader(GLuint shader){
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
+    // Change current object
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
         selected_object++;
         selected_object %= objects.size();
 
-        cout << "Selected object: " << selected_object << endl;
+        cout << "Object #" << selected_object << " > " << "Selected" << endl;
     }
 
     // Rotate -y (key RIGHT)
     if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)){
         objects[selected_object]->rotate(0, -M_PI / 10.0f, 0);
-        cout << "Rotate(0, -π/10, 0)"  << endl;
+        cout << "Object #" << selected_object << " > " << "Rotate(0, -π/10, 0)"  << endl;
     }
     // Rotate y (key LEFT)
     if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT)){
         objects[selected_object]->rotate(0, M_PI / 10.0f, 0);
-        cout << "Rotate(0, π/10, 0)"  << endl;
+        cout << "Object #" << selected_object << " > " << "Rotate(0, π/10, 0)"  << endl;
     }
     // Rotate -z (key UP)
     if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT)){
         objects[selected_object]->rotate(0, 0, -M_PI / 10.0f);
-        cout << "Rotate(-π/10, 0, 0)"  << endl;
+        cout << "Object #" << selected_object << " > " << "Rotate(-π/10, 0, 0)"  << endl;
     }
     // Rotate z (key DOWN)
     if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT)){
         objects[selected_object]->rotate(0, 0, M_PI / 10.0f);
-        cout << "Rotate(π/10, 0, 0)"  << endl;
+        cout << "Object #" << selected_object << " > " << "Rotate(π/10, 0, 0)"  << endl;
     }
 
     // Scale up (key E)
     if (key == GLFW_KEY_E && (action == GLFW_PRESS || action == GLFW_REPEAT)){
         objects[selected_object]->scale(1.1f);
-        cout << "Scale(1.1)"  << endl;
+        cout << "Object #" << selected_object << " > " << "Scale(1.1)"  << endl;
     }
     // Scale down (key Q)
     if (key == GLFW_KEY_Q && (action == GLFW_PRESS || action == GLFW_REPEAT)){
         objects[selected_object]->scale(0.9f);
-        cout << "Scale(0.9)"  << endl;
+        cout << "Object #" << selected_object << " > " << "Scale(0.9)"  << endl;
+    }
+
+    // Translate up (key W)
+    if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->translate(0, 0.1f, 0);
+        cout << "Object #" << selected_object << " > " << "Translate(0, 0.1, 0)"  << endl;
+    }
+    // Translate down (key S)
+    if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->translate(0, -0.1f, 0);
+        cout << "Object #" << selected_object << " > " << "Translate(0, -0.1, 0)"  << endl;
+    }
+    // Translate right (key D)
+    if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->translate(0.1f, 0, 0);
+        cout << "Object #" << selected_object << " > " << "Translate(0.1, 0, 0)"  << endl;
+    }
+    // Translate right (key A)
+    if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+        objects[selected_object]->translate(-0.1f, 0, 0);
+        cout << "Object #" << selected_object << " > " << "Translate(-0.1, 0, 0)"  << endl;
     }
 
 }
@@ -191,7 +213,7 @@ int main(){
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(1.0, 1.0, 1.0, 1.0);
+        glClearColor(0.2, 0.2, 0.2, 1.0);
 
         // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
